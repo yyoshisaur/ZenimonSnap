@@ -22,11 +22,11 @@ state = {
 }
 
 items = {
-	["Soultrapper"] = 18721,
-	["Soultrapper 2000"] = 18724,
-	["Blank Soulplate"] = 18722,
-	["Blank high-speed soul plate"] = 18725,
-	["Soul Plate"] = 2477
+	["獣写器"] = 18721,
+	["高速獣写器"] = 18724,
+	["獣影板"] = 18722,
+	["高速獣影板"] = 18725,
+	["封獣板"] = 2477
 }
 
 time_offset = -39601
@@ -104,11 +104,11 @@ end
 local function get_recast_info(name)
 	local item = get_inventory_item(name)
 
-	local CurrentTime = (os.time(os.date('!*t')) + time_offset)
+	-- local CurrentTime = (os.time(os.date('!*t')) + time_offset)
 	if item ~= nil and type(item) == "table" and item.id ~= 0 then
 		local data = extdata.decode(item)
-        return { next_use_time = math.max(data.next_use_time - CurrentTime, 0),
-    			 activation_time = math.max(data.activation_time - CurrentTime, 0),
+        return { next_use_time = math.max(data.next_use_time + 18000 - os.time(), 0),
+    			 activation_time = math.max(data.activation_time + 18000 - os.time(), 0),
     			 charges_remaining = data.charges_remaining}
     end
     return nil
@@ -118,7 +118,7 @@ local function use_camera()
 	state.trying_use_camera = true
 	while state.trying_use_camera and not state.stopping do
 		debug('use camera')
-		windower.send_command('input /item "'..state.equipped_camera..'" <t>')
+		windower.send_command('input /item "'..windower.to_shift_jis(state.equipped_camera)..'" <t>')
 		coroutine.sleep(1)
 	end	
 	debug('end camera use.')
@@ -146,8 +146,8 @@ local function get_camera(name)
 end
 
 local function find_and_equip_camera()
-	local soultrapper = get_camera("Soultrapper")
-	local soultrapper2000 = get_camera("Soultrapper 2000")
+	local soultrapper = get_camera("獣写器")
+	local soultrapper2000 = get_camera("高速獣写器")
 	if soultrapper == nil and soultrapper2000 == nil then
 		return false
 	end
@@ -155,17 +155,17 @@ local function find_and_equip_camera()
 	local soultrapper_recast = 1000
 	local soultrapper2000_recast = 1000
 	if soultrapper ~= nil then
-		soultrapper_recast = get_recast_info("Soultrapper").next_use_time
+		soultrapper_recast = get_recast_info("獣写器").next_use_time
 	end
 	if soultrapper2000 ~= nil then
-		soultrapper2000_recast = get_recast_info("Soultrapper 2000").next_use_time
+		soultrapper2000_recast = get_recast_info("高速獣写器").next_use_time
 	end
 
 	if soultrapper2000_recast < soultrapper_recast then
-		equip_camera("Soultrapper 2000")
+		equip_camera("高速獣写器")
 		return true
 	else
-		equip_camera("Soultrapper")
+		equip_camera("獣写器")
 		return true
 	end
 
@@ -173,15 +173,15 @@ local function find_and_equip_camera()
 end
 
 local function find_and_equip_plates()
-	local soulplate = get_inventory_item("Blank Soulplate")
+	local soulplate = get_inventory_item("獣影板")
 	if soulplate == nil then
-		soulplate = get_inventory_item("Blank high-speed soul plate")
+		soulplate = get_inventory_item("高速獣影板")
 		if soulplate == nil then
 			return false
 		end
-		equip_plate("Blank high-speed soul plate")
+		equip_plate("高速獣影板")
 	else
-		equip_plate("Blank Soulplate")
+		equip_plate("獣影板")
 	end
 
 	return true
@@ -261,7 +261,7 @@ local function get_mob_by_name(name)
 end
 
 local function trade_plate()
-	local plate_item = get_inventory_item("Soul Plate")
+	local plate_item = get_inventory_item("封獣板")
 	if not plate_item then
 		state.trading_plates = false
 		log("No plates found in inventory.")
